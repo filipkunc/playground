@@ -74,6 +74,7 @@ export const defaultOptions: Required<OxcOptions> = {
   },
   parser: {
     extension: "tsx",
+    editorRecovery: true,
     allowReturnOutsideFunction: true,
     preserveParens: true,
     allowV8Intrinsics: true,

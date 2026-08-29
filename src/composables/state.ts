@@ -10,7 +10,7 @@ export const autoFocus = ref(true);
 export const outputHoverRange = ref<Range>();
 
 // Active tab state for output panel
-export const activeTab = ref("codegen");
+export const activeTab = ref("ir");
 
 // Formatter panel checkbox states
 export const formatterPanels = reactive({

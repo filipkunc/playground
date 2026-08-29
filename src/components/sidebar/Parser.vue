@@ -22,6 +22,16 @@ function toggleOptions() {
       <Input v-model="options.parser.extension" class="h-8 p-1" />
     </label>
 
+    <Checkbox
+      v-model="options.parser.editorRecovery"
+      default-checked
+      label="editorRecovery"
+      label-class="text-xs font-mono"
+    />
+    <p class="text-xs text-secondary-foreground">
+      Try <code>let value =</code>; bare <code>let</code> has no missing expression slot.
+    </p>
+
     <button
       type="button"
       class="flex items-center gap-1 text-sm text-secondary-foreground transition-colors hover:text-foreground"
