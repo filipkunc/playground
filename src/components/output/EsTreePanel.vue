@@ -32,6 +32,13 @@ const code = computed(() => {
 
 <template>
   <div class="h-full w-full overflow-auto p-2">
+    <p
+      v-if="oxc.hasRecovery"
+      class="mb-3 rounded border border-amber-500/40 bg-amber-500/10 p-2 text-sm"
+    >
+      ESTree excludes editor-recovery nodes. Open <strong>Rust AST</strong> to inspect
+      <code>MissingExpression</code>.
+    </p>
     <Checkbox v-model="raw" label="Raw" />
 
     <OutputPreview v-if="raw" :code lang="json" />

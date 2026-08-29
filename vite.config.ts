@@ -37,13 +37,13 @@ let oxcCommit: string | undefined;
 const COMMIT_FILE = path.join(oxcPlayground, "git-commit");
 if (existsSync(COMMIT_FILE)) {
   oxcCommit = readFileSync(COMMIT_FILE, "utf8")?.trim();
-  if (!oxcCommit) {
-    const { stdout } = spawnSync("git", ["rev-parse", "HEAD"], {
-      cwd: oxcPlayground,
-      encoding: "utf8",
-    });
-    oxcCommit = stdout.trim();
-  }
+}
+if (!oxcCommit) {
+  const { stdout } = spawnSync("git", ["rev-parse", "HEAD"], {
+    cwd: oxcPlayground,
+    encoding: "utf8",
+  });
+  oxcCommit = stdout.trim();
 }
 
 // https://vitejs.dev/config/
@@ -86,6 +86,7 @@ export default defineConfig({
   },
   define: {
     "import.meta.env.OXC_COMMIT": JSON.stringify(oxcCommit),
+    "import.meta.env.OXC_REPOSITORY": JSON.stringify("filipkunc/oxc"),
   },
   build: {
     target: "esnext",

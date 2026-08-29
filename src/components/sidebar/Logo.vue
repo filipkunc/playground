@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const commit = import.meta.env.OXC_COMMIT || "unknown";
+const repository = import.meta.env.OXC_REPOSITORY || "filipkunc/oxc";
 </script>
 
 <template>
@@ -14,13 +15,13 @@ const commit = import.meta.env.OXC_COMMIT || "unknown";
     </a>
     <a
       v-if="commit !== 'unknown'"
-      :href="`https://github.com/oxc-project/oxc/commit/${commit}`"
+      :href="`https://github.com/${repository}/commit/${commit}`"
       class="text-xs font-mono opacity-50 transition-opacity hover:opacity-100"
       target="_blank"
       rel="noopener noreferrer"
-      :aria-label="`View commit ${commit.slice(0, 7)}`"
+      :aria-label="`View ${repository} commit ${commit.slice(0, 7)}`"
     >
-      @{{ commit.slice(0, 7) }}
+      fork @{{ commit.slice(0, 7) }}
     </a>
   </header>
 </template>
