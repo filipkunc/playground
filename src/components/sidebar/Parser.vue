@@ -3,7 +3,9 @@ import { Icon } from "@iconify/vue";
 import { ref } from "vue";
 import Checkbox from "~/components/ui/Checkbox.vue";
 import { useOxc } from "~/composables/oxc";
+import { recoveryInspectionMode, selectedRecoveryExample } from "~/composables/state";
 import { Input } from "~/ui/input";
+import { RECOVERY_EXAMPLES } from "~/utils/constants";
 
 const { options } = await useOxc();
 const showOptions = ref(false);
@@ -22,14 +24,32 @@ function toggleOptions() {
       <Input v-model="options.parser.extension" class="h-8 p-1" />
     </label>
 
-    <Checkbox
-      v-model="options.parser.editorRecovery"
-      default-checked
-      label="editorRecovery"
-      label-class="text-xs font-mono"
-    />
+    <label class="flex flex-col gap-1 text-sm">
+      <span class="text-secondary-foreground">Recovery mode</span>
+      <select
+        v-model="recoveryInspectionMode"
+        data-recovery-mode-select
+        class="h-8 rounded-md border border-input bg-background px-2 text-xs"
+      >
+        <option value="normal">Normal</option>
+        <option value="editor">Editor</option>
+        <option value="compare">Compare</option>
+      </select>
+    </label>
+    <label class="flex flex-col gap-1 text-sm">
+      <span class="text-secondary-foreground">Recovery example</span>
+      <select
+        v-model="selectedRecoveryExample"
+        data-recovery-example-select
+        class="h-8 rounded-md border border-input bg-background px-2 text-xs"
+      >
+        <option v-for="example in RECOVERY_EXAMPLES" :key="example.id" :value="example.id">
+          {{ example.label }}
+        </option>
+      </select>
+    </label>
     <p class="text-xs text-secondary-foreground">
-      Try <code>let value =</code>; bare <code>let</code> has no missing expression slot.
+      Missing expressions stay zero-width while later trustworthy declarations remain visible.
     </p>
 
     <button

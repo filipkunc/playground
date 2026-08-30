@@ -11,7 +11,7 @@ defineProps<{
   main?: boolean;
 }>();
 
-const { oxc } = await useOxc();
+const { activeRecoveryInspection, oxc } = await useOxc();
 
 const monacoRef = useTemplateRef("monacoRef");
 const getPositionAt = computed(() => monacoRef.value?.getPositionAt);
@@ -21,18 +21,20 @@ watchEffect(() => {
   const getPos = getPositionAt.value;
   if (!getPos) return;
 
-  const diagnostics = oxc.value.getDiagnostics();
-  markers.value = diagnostics.map((d) => {
-    const startPos = getPos(d.labels[0]?.start ?? 0);
-    const endPos = getPos(d.labels[0]?.end ?? 0);
+  const inspection = activeRecoveryInspection.value;
+  const diagnostics =
+    inspection?.status === "clean" ? oxc.value.getDiagnostics() : (inspection?.diagnostics ?? []);
+  markers.value = diagnostics.map((diagnostic) => {
+    const label = diagnostic.labels[0];
+    const startPos = getPos(label?.start ?? 0);
+    const endPos = getPos(label?.end ?? 0);
     return {
-      severity:
-        d.severity === "Warning" ? monaco.MarkerSeverity.Warning : monaco.MarkerSeverity.Error,
+      severity: monaco.MarkerSeverity.Error,
       startLineNumber: startPos.lineNumber,
       startColumn: startPos.column,
       endLineNumber: endPos.lineNumber,
       endColumn: endPos.column,
-      message: `Oxc ${d.severity}: ${d.message}`,
+      message: `Oxc Error: ${diagnostic.message}`,
     };
   });
 });

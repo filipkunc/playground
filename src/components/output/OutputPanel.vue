@@ -8,6 +8,7 @@ import CodegenPanel from "./CodegenPanel.vue";
 import ControlflowPanel from "./ControlflowPanel.vue";
 import EsTreePanel from "./EsTreePanel.vue";
 import FormatterPanel from "./FormatterPanel.vue";
+import RecoveryPanel from "./RecoveryPanel.vue";
 import RustAstPanel from "./RustAstPanel.vue";
 import ScopePanel from "./ScopePanel.vue";
 import SymbolPanel from "./SymbolPanel.vue";
@@ -36,6 +37,7 @@ onMounted(updateRunOptions);
       class="relative h-auto flex flex-shrink-0 justify-start gap-0 overflow-auto rounded-none px-2"
     >
       <TabsTrigger value="codegen"> Printed </TabsTrigger>
+      <TabsTrigger value="recovery"> Recovery </TabsTrigger>
       <TabsTrigger value="ast"> ESTree AST </TabsTrigger>
       <TabsTrigger value="ir"> Rust AST </TabsTrigger>
       <TabsTrigger value="formatter"> Formatter </TabsTrigger>
@@ -45,6 +47,9 @@ onMounted(updateRunOptions);
     </TabsList>
 
     <div class="h-full min-h-0 min-w-0">
+      <TabsContent value="recovery">
+        <RecoveryPanel />
+      </TabsContent>
       <TabsContent value="ast">
         <EsTreePanel />
       </TabsContent>

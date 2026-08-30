@@ -78,6 +78,9 @@ export default defineConfig({
     "*.{js,jsx,tsx,ts,mts,vue}": "vp lint --fix",
   },
   fmt: {},
+  test: {
+    include: ["src/**/*.test.ts"],
+  },
   resolve: {
     alias: {
       "~": path.resolve(import.meta.dirname, "./src"),
@@ -129,7 +132,10 @@ export default defineConfig({
     },
   },
   experimental: {
-    bundledDev: true,
+    // Vitest currently relies on Vite's standard transform pipeline. Rolldown's bundled-dev
+    // path tries to parse imported TypeScript before lowering it and eagerly pulls in the native
+    // playground entry point, so keep that preview optimization out of test workers.
+    bundledDev: process.env.VITEST !== "true",
   },
   server: {
     // These two cross origin headers are used to fix the following error:
