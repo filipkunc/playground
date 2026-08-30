@@ -5,7 +5,7 @@ import Checkbox from "~/components/ui/Checkbox.vue";
 import { useOxc } from "~/composables/oxc";
 import { recoveryInspectionMode, selectedRecoveryExample } from "~/composables/state";
 import { Input } from "~/ui/input";
-import { RECOVERY_EXAMPLES } from "~/utils/constants";
+import { RECOVERY_EXAMPLES, TSRS_EXAMPLES } from "~/utils/constants";
 
 const { options } = await useOxc();
 const showOptions = ref(false);
@@ -37,19 +37,26 @@ function toggleOptions() {
       </select>
     </label>
     <label class="flex flex-col gap-1 text-sm">
-      <span class="text-secondary-foreground">Recovery example</span>
+      <span class="text-secondary-foreground">Example</span>
       <select
         v-model="selectedRecoveryExample"
         data-recovery-example-select
         class="h-8 rounded-md border border-input bg-background px-2 text-xs"
       >
-        <option v-for="example in RECOVERY_EXAMPLES" :key="example.id" :value="example.id">
-          {{ example.label }}
-        </option>
+        <optgroup label="Oxc editor recovery">
+          <option v-for="example in RECOVERY_EXAMPLES" :key="example.id" :value="example.id">
+            {{ example.label }}
+          </option>
+        </optgroup>
+        <optgroup label="tsrs type checker">
+          <option v-for="example in TSRS_EXAMPLES" :key="example.id" :value="example.id">
+            {{ example.label }}
+          </option>
+        </optgroup>
       </select>
     </label>
     <p class="text-xs text-secondary-foreground">
-      Missing expressions stay zero-width while later trustworthy declarations remain visible.
+      Explore Oxc recovery and the bounded tsrs type-checking subset in the same editor.
     </p>
 
     <button

@@ -87,6 +87,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@4.3.3)
+      tsrs-playground:
+        specifier: link:../../napi/playground
+        version: link:../../napi/playground
       typescript:
         specifier: ^6.0.0
         version: 6.0.3

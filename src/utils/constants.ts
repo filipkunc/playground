@@ -3,7 +3,7 @@ export const RECOVERY_EXAMPLES = [
     id: "missing-variable-initializer",
     label: "Missing variable initializer",
     code: `
-const broken = ;
+const broken =
 const intact: number = "wrong";
 `.trim(),
   },
@@ -145,5 +145,49 @@ const intact: number = "also wrong";
 `.trim(),
   },
 ] as const;
+
+export const TSRS_EXAMPLES = [
+  {
+    id: "tsrs-json-shapes",
+    label: "JSON-shaped values",
+    code: `
+type Member = { id: number; nickname?: string };
+type Team = { name: string; members: Member[] };
+
+const team: Team = {
+  name: "checker",
+  members: [
+    { id: 1, nickname: "tsrs" },
+    { id: "two", extra: true },
+  ],
+};
+`.trim(),
+  },
+  {
+    id: "tsrs-callable-expressions",
+    label: "Callable expressions",
+    code: `
+const format = (value: string, count: number): string => value;
+
+const enabled = function (value: boolean): boolean {
+  return value;
+};
+
+format(42, "once");
+format("missing count");
+enabled("yes");
+`.trim(),
+  },
+  {
+    id: "tsrs-incomplete-arrow",
+    label: "Incomplete arrow recovery",
+    code: `
+const broken = (value: string): => value;
+const intact: number = "wrong";
+`.trim(),
+  },
+] as const;
+
+export const PLAYGROUND_EXAMPLES = [...RECOVERY_EXAMPLES, ...TSRS_EXAMPLES] as const;
 
 export const PLAYGROUND_DEMO_CODE = RECOVERY_EXAMPLES[0].code;

@@ -4,6 +4,7 @@ import Header from "~/components/header/Header.vue";
 import IoContainer from "~/components/IoContainer.vue";
 import Sidebar from "~/components/sidebar/Sidebar.vue";
 import { loadingOxc } from "~/composables/oxc";
+import { loadingTsrs } from "~/composables/tsrs";
 </script>
 
 <template>
@@ -20,6 +21,7 @@ import { loadingOxc } from "~/composables/oxc";
       <div class="h-screen w-screen flex flex-col items-center justify-center gap-4 text-2xl">
         <Icon icon="ri:loader-2-line" class="animate-spin text-6xl" />
         <span v-if="loadingOxc">Loading Oxc wasm...</span>
+        <span v-else-if="loadingTsrs">Loading tsrs wasm...</span>
         <span v-else>Loading resources...</span>
       </div>
     </template>

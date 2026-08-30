@@ -69,7 +69,7 @@ watch(
   () => {
     if (!instance) return;
     if (props.markers) {
-      monaco.editor.setModelMarkers(model.value, "oxc", props.markers);
+      monaco.editor.setModelMarkers(model.value, "playground", props.markers);
     }
   },
 );

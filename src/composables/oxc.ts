@@ -8,7 +8,12 @@ import {
   recoveryInspectionMode,
   selectedRecoveryExample,
 } from "~/composables/state";
-import { PLAYGROUND_DEMO_CODE, RECOVERY_EXAMPLES } from "~/utils/constants";
+import {
+  PLAYGROUND_DEMO_CODE,
+  PLAYGROUND_EXAMPLES,
+  RECOVERY_EXAMPLES,
+  TSRS_EXAMPLES,
+} from "~/utils/constants";
 import { LINT_PLUGINS, getRequiredPlugins } from "~/utils/linter-rules";
 import {
   activeRecoveryMode,
@@ -51,15 +56,19 @@ if (isRecoveryInspectionMode(urlParams.recoveryMode)) {
 }
 const defaultRecoveryExample = RECOVERY_EXAMPLES[0];
 const initialRecoveryExample =
-  RECOVERY_EXAMPLES.find((example) => example.id === urlParams.example) ?? defaultRecoveryExample;
+  PLAYGROUND_EXAMPLES.find((example) => example.id === urlParams.example) ?? defaultRecoveryExample;
 selectedRecoveryExample.value = initialRecoveryExample.id;
 editorValue.value = urlParams.code || initialRecoveryExample.code;
+if (!urlParams.t && TSRS_EXAMPLES.some((example) => example.id === initialRecoveryExample.id)) {
+  activeTab.value = "tsrs";
+}
 
 watch(selectedRecoveryExample, (id) => {
-  const example = RECOVERY_EXAMPLES.find((candidate) => candidate.id === id);
+  const example = PLAYGROUND_EXAMPLES.find((candidate) => candidate.id === id);
   if (!example) return;
   urlParams.example = example.id === defaultRecoveryExample.id ? undefined : example.id;
   editorValue.value = example.code;
+  activeTab.value = TSRS_EXAMPLES.some((candidate) => candidate.id === id) ? "tsrs" : "recovery";
 });
 
 async function initialize(): Promise<Oxc> {

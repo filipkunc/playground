@@ -177,8 +177,9 @@ try {
     `(() => {
       const line = document.querySelector('.monaco-editor .view-line');
       const source = line?.textContent ?? '';
-      const offset = source.indexOf(';');
-      if (!line || offset < 0) return undefined;
+      const equals = source.lastIndexOf('=');
+      const offset = equals + 1;
+      if (!line || equals < 0) return undefined;
       const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
       let consumed = 0;
       let textNode;
@@ -568,11 +569,37 @@ try {
     ),
   );
 
+  await session.send("Page.navigate", {
+    url: `${pageUrl}?example=tsrs-callable-expressions`,
+  });
+  await poll("the named tsrs callable-expression example", () =>
+    evaluate(
+      session,
+      `(() => {
+        const example = document.querySelector('[data-recovery-example-select]');
+        const panel = document.querySelector('[data-tsrs-panel]');
+        const argumentErrors = panel?.querySelectorAll('[data-tsrs-diagnostic="TS2345"]');
+        const arityErrors = panel?.querySelectorAll('[data-tsrs-diagnostic="TS2554"]');
+        return example?.value === 'tsrs-callable-expressions' &&
+          Boolean(panel) && argumentErrors?.length === 3 && arityErrors?.length === 1;
+      })()`,
+    ),
+  );
+
+  await evaluate(session, `document.querySelector('[data-tsrs-diagnostic="TS2554"]')?.click()`);
+  await poll("the tsrs source highlight", () =>
+    evaluate(session, `Boolean(document.querySelector('.monaco-editor .ast-highlight'))`),
+  );
+
   session.close();
   console.log(
-    "Recovery browser smoke passed: recovered comparison became clean after editing and the named object/array/call/delimiter/parameter/function-body/return-expression/function-interface/class/Stage-5-deletion/type/malformed examples recovered.",
+    "Playground browser smoke passed: recovery examples remain interactive and the tsrs callable example reports argument/arity diagnostics with source highlighting.",
   );
 } finally {
   for (const child of processes.reverse()) await stop(child);
   await rm(temporaryProfile, { recursive: true, force: true });
 }
+
+// Node's built-in WebSocket may retain a closed DevTools handle after Chrome has exited. All
+// cleanup above is awaited, so terminate the successful smoke run instead of leaving CI hanging.
+process.exit(0);

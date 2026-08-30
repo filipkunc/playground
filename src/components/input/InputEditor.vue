@@ -2,7 +2,9 @@
 import * as monaco from "monaco-editor/editor/editor.api";
 import { computed, ref, useTemplateRef, watchEffect } from "vue";
 import { useOxc } from "~/composables/oxc";
+import { useTsrs } from "~/composables/tsrs";
 import { editorValue } from "~/composables/state";
+import { tsrsRangeToMonacoRange } from "~/utils/tsrs";
 import MonacoEditor from "../MonacoEditor.vue";
 
 defineProps<{
@@ -12,6 +14,7 @@ defineProps<{
 }>();
 
 const { activeRecoveryInspection, oxc } = await useOxc();
+const { diagnostics: tsrsDiagnostics } = await useTsrs();
 
 const monacoRef = useTemplateRef("monacoRef");
 const getPositionAt = computed(() => monacoRef.value?.getPositionAt);
@@ -24,7 +27,7 @@ watchEffect(() => {
   const inspection = activeRecoveryInspection.value;
   const diagnostics =
     inspection?.status === "clean" ? oxc.value.getDiagnostics() : (inspection?.diagnostics ?? []);
-  markers.value = diagnostics.map((diagnostic) => {
+  const oxcMarkers = diagnostics.map((diagnostic) => {
     const label = diagnostic.labels[0];
     const startPos = getPos(label?.start ?? 0);
     const endPos = getPos(label?.end ?? 0);
@@ -35,8 +38,27 @@ watchEffect(() => {
       endLineNumber: endPos.lineNumber,
       endColumn: endPos.column,
       message: `Oxc Error: ${diagnostic.message}`,
+      source: "oxc",
     };
   });
+  const tsrsMarkers = tsrsDiagnostics.value.map((diagnostic) => {
+    const [start, end] = diagnostic.range
+      ? tsrsRangeToMonacoRange(editorValue.value, diagnostic.range)
+      : [0, 0];
+    const startPos = getPos(start);
+    const endPos = getPos(end);
+    return {
+      severity: monaco.MarkerSeverity.Error,
+      startLineNumber: startPos.lineNumber,
+      startColumn: startPos.column,
+      endLineNumber: endPos.lineNumber,
+      endColumn: endPos.column,
+      message: diagnostic.message,
+      source: `tsrs (${diagnostic.phase})`,
+      code: diagnostic.code,
+    };
+  });
+  markers.value = [...oxcMarkers, ...tsrsMarkers];
 });
 </script>
 

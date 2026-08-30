@@ -12,6 +12,7 @@ import RecoveryPanel from "./RecoveryPanel.vue";
 import RustAstPanel from "./RustAstPanel.vue";
 import ScopePanel from "./ScopePanel.vue";
 import SymbolPanel from "./SymbolPanel.vue";
+import TsrsPanel from "./TsrsPanel.vue";
 
 const { options } = await useOxc();
 
@@ -38,6 +39,7 @@ onMounted(updateRunOptions);
     >
       <TabsTrigger value="codegen"> Printed </TabsTrigger>
       <TabsTrigger value="recovery"> Recovery </TabsTrigger>
+      <TabsTrigger value="tsrs"> tsrs Types </TabsTrigger>
       <TabsTrigger value="ast"> ESTree AST </TabsTrigger>
       <TabsTrigger value="ir"> Rust AST </TabsTrigger>
       <TabsTrigger value="formatter"> Formatter </TabsTrigger>
@@ -49,6 +51,9 @@ onMounted(updateRunOptions);
     <div class="h-full min-h-0 min-w-0">
       <TabsContent value="recovery">
         <RecoveryPanel />
+      </TabsContent>
+      <TabsContent value="tsrs">
+        <TsrsPanel />
       </TabsContent>
       <TabsContent value="ast">
         <EsTreePanel />

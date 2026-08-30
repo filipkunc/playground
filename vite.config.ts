@@ -31,6 +31,7 @@ function resolveOxcDir(): string {
 
 const oxcDir = resolveOxcDir();
 const oxcPlayground = path.join(oxcDir, "napi/playground");
+const tsrsPlayground = path.resolve(import.meta.dirname, "../../napi/playground");
 
 let oxcCommit: string | undefined;
 
@@ -146,7 +147,7 @@ export default defineConfig({
       "Cross-Origin-Embedder-Policy": "require-corp",
     },
     fs: {
-      allow: [import.meta.dirname, oxcPlayground],
+      allow: [import.meta.dirname, oxcPlayground, tsrsPlayground],
     },
   },
   plugins: [Vue(), tailwindcss()],
