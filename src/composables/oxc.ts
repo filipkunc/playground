@@ -1,8 +1,21 @@
 import { createGlobalState, useUrlSearchParams, watchDebounced } from "@vueuse/core";
 import { computed, ref, shallowRef, toRaw, triggerRef, watch, watchEffect } from "vue";
-import { activeTab, editorValue, enabledLintRules, formatterPanels } from "~/composables/state";
-import { PLAYGROUND_DEMO_CODE } from "~/utils/constants";
+import {
+  activeTab,
+  editorValue,
+  enabledLintRules,
+  formatterPanels,
+  recoveryInspectionMode,
+  selectedRecoveryExample,
+} from "~/composables/state";
+import { PLAYGROUND_DEMO_CODE, RECOVERY_EXAMPLES } from "~/utils/constants";
 import { LINT_PLUGINS, getRequiredPlugins } from "~/utils/linter-rules";
+import {
+  activeRecoveryMode,
+  isRecoveryInspectionMode,
+  recoveryInspectionModes,
+  serializeRecoveryMode,
+} from "~/utils/recovery";
 import type { Oxc, OxcOptions } from "oxc-playground";
 
 // Sync URL state with reactive state using VueUse
@@ -12,6 +25,8 @@ const urlParams = useUrlSearchParams<{
   formatterPanels?: string;
   options?: string;
   code?: string;
+  example?: string;
+  recoveryMode?: string;
   lintRules?: string;
 }>("history", { removeFalsyValues: true });
 
@@ -31,7 +46,21 @@ if (urlParams.formatterPanels) {
 if (urlParams.lintRules) {
   enabledLintRules.value = urlParams.lintRules.split(",").filter(Boolean);
 }
-editorValue.value = urlParams.code || PLAYGROUND_DEMO_CODE;
+if (isRecoveryInspectionMode(urlParams.recoveryMode)) {
+  recoveryInspectionMode.value = urlParams.recoveryMode;
+}
+const defaultRecoveryExample = RECOVERY_EXAMPLES[0];
+const initialRecoveryExample =
+  RECOVERY_EXAMPLES.find((example) => example.id === urlParams.example) ?? defaultRecoveryExample;
+selectedRecoveryExample.value = initialRecoveryExample.id;
+editorValue.value = urlParams.code || initialRecoveryExample.code;
+
+watch(selectedRecoveryExample, (id) => {
+  const example = RECOVERY_EXAMPLES.find((candidate) => candidate.id === id);
+  if (!example) return;
+  urlParams.example = example.id === defaultRecoveryExample.id ? undefined : example.id;
+  editorValue.value = example.code;
+});
 
 async function initialize(): Promise<Oxc> {
   const { Oxc } = await import("oxc-playground");
@@ -58,6 +87,46 @@ export const defaultFormatterConfig = {
   singleAttributePerLine: false,
   experimentalSortImports: undefined,
 };
+
+export interface RecoveryInspectionRange {
+  start: number;
+  end: number;
+}
+
+export interface RecoveryInspectionDiagnostic {
+  message: string;
+  labels: RecoveryInspectionRange[];
+}
+
+export interface RecoveryInspectionNode extends RecoveryInspectionRange {
+  kind: string;
+  recovered: boolean;
+  label?: string;
+  children: RecoveryInspectionNode[];
+}
+
+export interface RecoveryInspection {
+  mode: "normal" | "editor";
+  status: "clean" | "recovered" | "aborted";
+  statementCount: number;
+  diagnosticCount: number;
+  recoverySiteCount: number;
+  diagnostics: RecoveryInspectionDiagnostic[];
+  tree: RecoveryInspectionNode;
+  recoverySites: Array<
+    RecoveryInspectionRange & {
+      kind: string;
+      diagnosticIndex?: number;
+      parentPath: string[];
+    }
+  >;
+  declarationNames: string[];
+  semantic?: {
+    bindingNames: string[];
+    referenceCount: number;
+    diagnostics: RecoveryInspectionDiagnostic[];
+  };
+}
 
 export const defaultOptions: Required<OxcOptions> = {
   run: {
@@ -126,6 +195,12 @@ export const useOxc = createGlobalState(async () => {
   }
   const oxc = await oxcPromise;
   const state = shallowRef(oxc);
+  const recoveryInspections = shallowRef<Partial<Record<"normal" | "editor", RecoveryInspection>>>(
+    {},
+  );
+  const activeRecoveryInspection = computed(
+    () => recoveryInspections.value[activeRecoveryMode(recoveryInspectionMode.value)],
+  );
   const error = ref<unknown>();
 
   // Compute the linter config directly from enabledLintRules so it's always
@@ -165,6 +240,21 @@ export const useOxc = createGlobalState(async () => {
     try {
       const rawOptions = toRaw(options.value);
 
+      const modes = recoveryInspectionModes(recoveryInspectionMode.value);
+      const inspected: Partial<Record<"normal" | "editor", RecoveryInspection>> = {};
+      for (const mode of modes) {
+        inspected[mode] = JSON.parse(
+          oxc.inspectRecovery(editorValue.value, {
+            extension: rawOptions.parser.extension,
+            mode,
+            semantic: true,
+          }),
+        ) as RecoveryInspection;
+      }
+      recoveryInspections.value = inspected;
+      const inspection = inspected[activeRecoveryMode(recoveryInspectionMode.value)];
+      rawOptions.parser.editorRecovery = recoveryInspectionMode.value !== "normal";
+
       // Build linter config from enabledLintRules directly, ensuring it's
       // always up-to-date when run() fires (no dependency on external watcher)
       const config = linterConfig.value;
@@ -174,7 +264,11 @@ export const useOxc = createGlobalState(async () => {
         rawOptions.linter = { config: JSON.stringify(config) };
       }
 
-      oxc.run(editorValue.value, rawOptions);
+      // Recovered trees are intentionally parse/semantic-inspection-only. Batch consumers keep
+      // their existing valid-AST contract.
+      if (inspection?.status === "clean") {
+        oxc.run(editorValue.value, rawOptions);
+      }
       // Reset error if successful
       error.value = undefined;
     } catch (caughtError) {
@@ -184,7 +278,10 @@ export const useOxc = createGlobalState(async () => {
     console.error = originalError;
     triggerRef(state);
   }
-  watch([options, editorValue, activeTab, enabledLintRules], run, { deep: true, immediate: true });
+  watch([options, editorValue, activeTab, enabledLintRules, recoveryInspectionMode], run, {
+    deep: true,
+    immediate: true,
+  });
 
   // Sync tab and formatter panels to URL (reactive, no debounce needed)
   watchEffect(() => {
@@ -196,6 +293,10 @@ export const useOxc = createGlobalState(async () => {
       enabledPanels.length === 1 && enabledPanels[0] === "output"
         ? undefined
         : enabledPanels.join(",");
+  });
+
+  watchEffect(() => {
+    urlParams.recoveryMode = serializeRecoveryMode(recoveryInspectionMode.value);
   });
 
   // Sync enabled lint rules to URL (reactive, no debounce needed)
@@ -239,5 +340,7 @@ export const useOxc = createGlobalState(async () => {
     error,
     options,
     monacoLanguage,
+    recoveryInspections,
+    activeRecoveryInspection,
   };
 });

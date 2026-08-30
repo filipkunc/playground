@@ -3,6 +3,7 @@ import { useDark } from "@vueuse/core";
 import * as monaco from "monaco-editor/editor/editor.api";
 import { onBeforeUnmount, onMounted, ref, shallowRef, watch, watchEffect } from "vue";
 import { editorCursor, outputHoverRange } from "~/composables/state";
+import { recoveryDecorationClasses } from "~/utils/recovery";
 
 defineOptions({ name: "MonacoEditor" });
 
@@ -106,10 +107,7 @@ function initMonaco() {
         decorationsCollection = instance!.createDecorationsCollection([
           {
             range: monaco.Range.fromPositions(start, end),
-            options: {
-              isWholeLine: false,
-              className: "ast-highlight",
-            },
+            options: { isWholeLine: false, ...recoveryDecorationClasses(outputHoverRange.value) },
           },
         ]);
       } else {
