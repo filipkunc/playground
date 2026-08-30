@@ -62,8 +62,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: oxc-project/oxc
-          ref: main
+          repository: filipkunc/oxc
+          ref: 87e11609811a6c6dc669bf5ea9c2c8d7133a6297
           persist-credentials: false
 
       - uses: oxc-project/setup-node@d59b270414aa7d0eed947eed4eb5b0b8a675f01d # v1.4.0
