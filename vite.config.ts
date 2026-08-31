@@ -32,6 +32,10 @@ function resolveOxcDir(): string {
 const oxcDir = resolveOxcDir();
 const oxcPlayground = path.join(oxcDir, "napi/playground");
 const tsrsPlayground = path.resolve(import.meta.dirname, "../../napi/playground");
+const tsrsBrowserEntry = path.join(tsrsPlayground, "tsrs.wasi-browser.js");
+const tsrsModule = existsSync(tsrsBrowserEntry)
+  ? tsrsBrowserEntry
+  : path.resolve(import.meta.dirname, "./src/tsrs-playground-unavailable.ts");
 
 let oxcCommit: string | undefined;
 
@@ -86,6 +90,7 @@ export default defineConfig({
     alias: {
       "~": path.resolve(import.meta.dirname, "./src"),
       "@oxc": oxcDir,
+      "tsrs-playground": tsrsModule,
     },
   },
   define: {

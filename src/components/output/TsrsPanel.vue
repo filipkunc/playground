@@ -2,7 +2,7 @@
 import { computed } from "vue";
 import type { PlaygroundDiagnostic } from "tsrs-playground";
 import { useTsrs } from "~/composables/tsrs";
-import { editorValue, outputHoverRange } from "~/composables/state";
+import { editorValue, outputHoverRange, outputRevealRange } from "~/composables/state";
 import { tsrsRangeToMonacoRange } from "~/utils/tsrs";
 
 const { diagnostics, error } = await useTsrs();
@@ -13,6 +13,13 @@ const errorMessage = computed(() =>
 function highlight(diagnostic: PlaygroundDiagnostic) {
   if (!diagnostic.range) return;
   outputHoverRange.value = tsrsRangeToMonacoRange(editorValue.value, diagnostic.range);
+}
+
+function reveal(diagnostic: PlaygroundDiagnostic) {
+  if (!diagnostic.range) return;
+  const range = tsrsRangeToMonacoRange(editorValue.value, diagnostic.range);
+  outputHoverRange.value = range;
+  outputRevealRange.value = range;
 }
 </script>
 
@@ -39,7 +46,7 @@ function highlight(diagnostic: PlaygroundDiagnostic) {
             class="block w-full rounded border border-divider p-3 text-left text-sm hover:bg-muted"
             @mouseenter="highlight(diagnostic)"
             @mouseleave="outputHoverRange = undefined"
-            @click="highlight(diagnostic)"
+            @click="reveal(diagnostic)"
           >
             <span class="font-mono text-red-500">{{ diagnostic.code }}</span>
             <span class="ml-2 rounded bg-muted px-1.5 py-0.5 font-mono text-xs">

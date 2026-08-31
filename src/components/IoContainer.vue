@@ -29,7 +29,7 @@ function stringifyError(error: unknown) {
 <template>
   <main class="min-h-0 flex flex-1">
     <Splitter :direction="splitterDirection" class="flex-1">
-      <SplitterPanel :default-size="50" :min-size="20" class="flex flex-col">
+      <SplitterPanel :default-size="68" :min-size="35" class="flex flex-col">
         <div class="h-full min-w-0 flex flex-1 flex-col pt-2">
           <div class="min-h-50vh flex-grow-2 flex-basis-none">
             <InputEditor
@@ -50,7 +50,7 @@ function stringifyError(error: unknown) {
 
       <SplitterResizeHandle />
 
-      <SplitterPanel :default-size="50" :min-size="20" class="overflow-hidden">
+      <SplitterPanel :default-size="32" :min-size="20" class="overflow-hidden">
         <div class="h-full min-w-0 overflow-hidden">
           <Output v-if="!error" class="h-full overflow-auto" />
           <CopyContainer v-else :value="errorStr || ''" class="min-w-0 w-full flex">

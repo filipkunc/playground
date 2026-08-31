@@ -5,7 +5,16 @@ import { useOxc } from "~/composables/oxc";
 import { editorValue } from "~/composables/state";
 
 async function initialize() {
-  return import("tsrs-playground");
+  try {
+    return await import("tsrs-playground");
+  } catch (error) {
+    // Keep the editor usable when a local generated checker package is temporarily unavailable.
+    return {
+      checkSource(): never {
+        throw error;
+      },
+    };
+  }
 }
 
 export const loadingTsrs = ref(true);
