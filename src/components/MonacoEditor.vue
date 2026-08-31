@@ -82,6 +82,7 @@ function initMonaco() {
     minimap: { enabled: false },
     fontSize: props.main ? 28 : 14,
     lineHeight: props.main ? 58 : undefined,
+    cursorHeight: props.main ? 34 : undefined,
     padding: props.main ? { top: 32, bottom: 48 } : undefined,
     scrollBeyondLastLine: true,
     fixedOverflowWidgets: true,
@@ -247,5 +248,5 @@ defineExpose({
 </script>
 
 <template>
-  <div ref="container" class="h-full w-full" />
+  <div ref="container" :class="['h-full w-full', main && 'ast-lens-editor']" />
 </template>

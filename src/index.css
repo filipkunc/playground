@@ -150,6 +150,11 @@
     0 0 0 1px color-mix(in srgb, var(--ast-lens-active-border) 48%, transparent);
 }
 
+.ast-lens-editor .monaco-editor .selected-text {
+  height: 34px !important;
+  transform: translateY(12px);
+}
+
 .ast-lens-tag {
   display: block;
   pointer-events: none;
