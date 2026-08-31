@@ -2,6 +2,14 @@
 
 [playground.oxc.rs](https://playground.oxc.rs)
 
+## Inline AST lens
+
+The main editor projects the caret's AST path directly onto the source. Compact node labels use
+vertical lanes above the affected spans, nested frames show exact source ranges, and the fixed
+breadcrumb preserves the complete logical path without moving the code.
+
+![Caret-driven inline AST labels, nested source frames, and breadcrumb](docs/images/inline-ast-lens.jpg)
+
 ## Development
 
 Assuming the oxc repository is in `../oxc`:
