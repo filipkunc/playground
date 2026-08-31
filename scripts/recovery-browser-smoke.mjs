@@ -172,31 +172,29 @@ try {
     ),
   );
 
-  const insertionPoint = await evaluate(
-    session,
-    `(() => {
-      const line = document.querySelector('.monaco-editor .view-line');
-      const source = line?.textContent ?? '';
-      const equals = source.lastIndexOf('=');
-      const offset = equals + 1;
-      if (!line || equals < 0) return undefined;
+  const insertionPoint = await poll("the missing initializer insertion point", () =>
+    evaluate(
+      session,
+      `(() => {
+      const line = [...document.querySelectorAll('.monaco-editor .view-line')]
+        .find((candidate) => candidate.textContent?.includes('='));
+      if (!line) return undefined;
       const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
-      let consumed = 0;
       let textNode;
       while ((textNode = walker.nextNode())) {
-        if (consumed + textNode.data.length >= offset) {
+        const equals = textNode.data.lastIndexOf('=');
+        if (equals >= 0) {
           const range = document.createRange();
-          range.setStart(textNode, offset - consumed);
+          range.setStart(textNode, equals + 1);
           range.collapse(true);
           const caret = range.getBoundingClientRect();
           const lineRect = line.getBoundingClientRect();
           return { x: caret.left, y: lineRect.top + lineRect.height / 2 };
         }
-        consumed += textNode.data.length;
       }
     })()`,
+    ),
   );
-  assert(insertionPoint, "The missing initializer insertion point should be rendered");
   await session.send("Input.dispatchMouseEvent", {
     type: "mouseMoved",
     x: insertionPoint.x,
@@ -229,6 +227,17 @@ try {
     focusState.focused,
     true,
     `Clicking Monaco at ${JSON.stringify(insertionPoint)} should focus its edit context; active element was ${JSON.stringify(focusState)}`,
+  );
+  await poll("the inline AST recovery lens", () =>
+    evaluate(
+      session,
+      `(() => {
+        const tags = [...document.querySelectorAll('.monaco-editor .ast-lens-tag')]
+          .map((tag) => tag.textContent);
+        const selected = document.querySelector('[data-ast-lens-selected-kind]')?.textContent?.trim();
+        return tags.some((tag) => tag?.includes('Missing')) && selected === 'MissingExpression';
+      })()`,
+    ),
   );
   await session.send("Input.insertText", { text: "1" });
 
@@ -597,7 +606,7 @@ try {
   );
 } finally {
   for (const child of processes.reverse()) await stop(child);
-  await rm(temporaryProfile, { recursive: true, force: true });
+  await rm(temporaryProfile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 }
 
 // Node's built-in WebSocket may retain a closed DevTools handle after Chrome has exited. All

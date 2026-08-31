@@ -11,6 +11,7 @@ export const recoveryInspectionMode = ref<RecoveryInspectionMode>("compare");
 export const editorCursor = ref(0);
 export const autoFocus = ref(true);
 export const outputHoverRange = ref<Range>();
+export const outputRevealRange = ref<Range>();
 
 // Active tab state for output panel
 export const activeTab = ref("recovery");

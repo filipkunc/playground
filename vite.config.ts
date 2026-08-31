@@ -86,6 +86,7 @@ export default defineConfig({
     alias: {
       "~": path.resolve(import.meta.dirname, "./src"),
       "@oxc": oxcDir,
+      "tsrs-playground": path.join(tsrsPlayground, "tsrs.wasi-browser.js"),
     },
   },
   define: {
