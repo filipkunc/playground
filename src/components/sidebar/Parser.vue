@@ -31,9 +31,9 @@ function toggleOptions() {
         data-recovery-mode-select
         class="h-8 rounded-md border border-input bg-background px-2 text-xs"
       >
-        <option value="normal">Normal</option>
-        <option value="editor">Editor</option>
-        <option value="compare">Compare</option>
+        <option value="normal">Oxc Normal</option>
+        <option value="editor">TypeScript-Rust</option>
+        <option value="compare">Rust / Go / Oxc comparison</option>
       </select>
     </label>
     <label class="flex flex-col gap-1 text-sm">
@@ -56,7 +56,8 @@ function toggleOptions() {
       </select>
     </label>
     <p class="text-xs text-secondary-foreground">
-      Explore Oxc recovery and the bounded tsrs type-checking subset in the same editor.
+      Compare TypeScript-Rust recovery with the pinned TypeScript-Go reference and Oxc's normal
+      parser baseline.
     </p>
 
     <button

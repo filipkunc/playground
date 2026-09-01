@@ -8,6 +8,22 @@ const intact: number = "wrong";
 `.trim(),
   },
   {
+    id: "missing-variable-declaration-separator",
+    label: "Missing variable declaration separator",
+    code: `
+const broken: string = "abc";
+const intact number = "wrong";
+`.trim(),
+  },
+  {
+    id: "invalid-numeric-suffix",
+    label: "Invalid numeric suffix",
+    code: `
+const broken =123s
+const intact: number = "wrong";
+`.trim(),
+  },
+  {
     id: "missing-assignment-rhs",
     label: "Missing assignment right-hand side",
     code: `

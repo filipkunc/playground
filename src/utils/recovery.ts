@@ -11,7 +11,7 @@ export interface RecoveryTreeNode extends RecoveryRange {
 }
 
 export interface RecoverySummarySource {
-  mode: ConcreteRecoveryMode;
+  mode: ConcreteRecoveryMode | "reference";
   status: "clean" | "recovered" | "aborted";
   statementCount: number;
   recoverySiteCount: number;

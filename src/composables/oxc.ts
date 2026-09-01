@@ -103,6 +103,8 @@ export interface RecoveryInspectionRange {
 }
 
 export interface RecoveryInspectionDiagnostic {
+  code?: string;
+  phase?: "parse" | "bind" | "check";
   message: string;
   labels: RecoveryInspectionRange[];
 }
@@ -115,7 +117,9 @@ export interface RecoveryInspectionNode extends RecoveryInspectionRange {
 }
 
 export interface RecoveryInspection {
-  mode: "normal" | "editor";
+  implementation?: "oxc" | "typescript-go";
+  revision?: string;
+  mode: "normal" | "editor" | "reference";
   status: "clean" | "recovered" | "aborted";
   statementCount: number;
   diagnosticCount: number;
@@ -132,7 +136,7 @@ export interface RecoveryInspection {
   declarationNames: string[];
   semantic?: {
     bindingNames: string[];
-    referenceCount: number;
+    referenceCount?: number;
     diagnostics: RecoveryInspectionDiagnostic[];
   };
 }

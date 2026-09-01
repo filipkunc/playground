@@ -36,6 +36,11 @@ const tsrsBrowserEntry = path.join(tsrsPlayground, "tsrs.wasi-browser.js");
 const tsrsModule = existsSync(tsrsBrowserEntry)
   ? tsrsBrowserEntry
   : path.resolve(import.meta.dirname, "./src/tsrs-playground-unavailable.ts");
+const typescriptGoProxy = {
+  "/api/typescript-go": {
+    target: "http://127.0.0.1:4174",
+  },
+};
 
 let oxcCommit: string | undefined;
 
@@ -154,6 +159,8 @@ export default defineConfig({
     fs: {
       allow: [import.meta.dirname, oxcPlayground, tsrsPlayground],
     },
+    proxy: typescriptGoProxy,
   },
+  preview: { proxy: typescriptGoProxy },
   plugins: [Vue(), tailwindcss()],
 });

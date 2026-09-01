@@ -115,7 +115,11 @@ try {
   const preview = spawn(
     "pnpm",
     ["exec", "vp", "preview", "--host", "127.0.0.1", "--port", String(previewPort)],
-    { cwd: root, env: { ...process.env, NO_COLOR: "1" }, stdio: ["ignore", "pipe", "pipe"] },
+    {
+      cwd: root,
+      env: { ...process.env, NO_COLOR: "1" },
+      stdio: ["ignore", "pipe", "pipe"],
+    },
   );
   processes.push(preview);
   const pageUrl = `http://127.0.0.1:${previewPort}/`;
@@ -167,7 +171,9 @@ try {
         const bindings = editor?.querySelector('[data-recovery-summary="bindings"]');
         return normal?.dataset.recoveryStatus === 'aborted' &&
           editor?.dataset.recoveryStatus === 'recovered' &&
-          Boolean(missing) && bindings?.textContent?.includes('2 bindings');
+          missing?.matches('[data-recovery-leaf="true"]') &&
+          Boolean(missing.querySelector('[data-recovery-leaf-marker]')) &&
+          bindings?.textContent?.includes('2 bindings');
       })()`,
     ),
   );
@@ -606,7 +612,12 @@ try {
   );
 } finally {
   for (const child of processes.reverse()) await stop(child);
-  await rm(temporaryProfile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  await rm(temporaryProfile, {
+    recursive: true,
+    force: true,
+    maxRetries: 5,
+    retryDelay: 100,
+  });
 }
 
 // Node's built-in WebSocket may retain a closed DevTools handle after Chrome has exited. All
